@@ -31,7 +31,7 @@ export default function LoginPage() {
       saveAuth(data.data.token, data.data.user.role, data.data.user.name);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please try again.');
+      setError(err.response?.data?.message || 'Connexion impossible. Veuillez réessayer.');
     } finally {
       setLoading(false);
     }
@@ -40,8 +40,8 @@ export default function LoginPage() {
   return (
     <div style={styles.wrapper}>
       <div style={styles.card}>
-        <h1 style={styles.title}>Hotel ERP</h1>
-        <p style={styles.subtitle}>Admin Panel</p>
+        <h1 style={styles.title}>Bladjo Hotel</h1>
+        <p style={styles.subtitle}>Espace administration</p>
 
         <form onSubmit={handleSubmit} style={styles.form}>
           {error && <div style={styles.error}>{error}</div>}
@@ -56,7 +56,7 @@ export default function LoginPage() {
               onFocus={() => setFocusedField('email')}
               onBlur={() => setFocusedField('')}
               required
-              placeholder="admin@hotel.com"
+              placeholder="admin@hotel-erp.com"
               style={{
                 ...styles.input,
                 borderColor: focusedField === 'email' ? '#2563eb' : '#ddd',
@@ -89,7 +89,7 @@ export default function LoginPage() {
             disabled={loading}
             style={{ ...styles.button, opacity: loading ? 0.7 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
           >
-            {loading ? 'Signing in…' : 'Sign In'}
+            {loading ? 'Connexion…' : 'Se connecter'}
           </button>
         </form>
       </div>

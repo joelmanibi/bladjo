@@ -28,7 +28,7 @@ export default function Sidebar() {
       {/* Brand */}
       <div style={styles.brand}>
         <span style={styles.brandIcon}>🏨</span>
-        <span style={styles.brandName}>Hotel ERP</span>
+        <span style={styles.brandName}>Bladjo Hotel</span>
       </div>
 
       {/* Navigation */}
@@ -50,7 +50,7 @@ export default function Sidebar() {
 
       {/* Footer */}
       <div style={styles.sidebarFooter}>
-        <span style={styles.footerText}>Admin Panel</span>
+        <span style={styles.footerText}>Administration</span>
       </div>
     </aside>
   );
