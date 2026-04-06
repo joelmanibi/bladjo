@@ -47,9 +47,123 @@ Ce projet utilise donc :
 
 ### Architecture retenue
 
-- **Nginx** sert le frontend React compilé depuis `hotel-admin/dist`
-- **PM2** exécute le backend Node.js
-- **Nginx** reverse-proxy l’API vers `127.0.0.1:3100`
+- **PM2** exécute le frontend sur `127.0.0.1:4173`
+- **PM2** exécute le backend sur `127.0.0.1:3100`
+- **Nginx** reverse-proxy :
+  - `www.bladjo-hotel.com` → frontend
+  - `myadmin.hotel-bladjo.com` → frontend
+  - `api.bladjo-hotel.com` → backend
+
+### Comment le frontend est déployé en production
+
+Le frontend est :
+
+1. **buildé** avec Vite
+2. **servi par PM2** via `vite preview`
+3. **exposé par Nginx** sur les domaines public et admin
+
+En production, on build d’abord :
+
+```bash
+cd /opt/bladjo/hotel-admin
+npm ci
+npm run build
+```
+
+Cette commande génère le dossier :
+
+- `/opt/bladjo/hotel-admin/dist`
+
+Ensuite, PM2 lance le frontend avec :
+
+```bash
+pm2 start ecosystem.config.js --env production --only bladjo-front
+```
+
+Donc ici :
+
+- pas de `npm run dev` en production
+- pas de frontend exposé directement sur Internet
+- Nginx reverse-proxy vers le port frontend PM2
+
+### Répartition Nginx
+
+#### 1. Domaine public
+
+- domaine : `www.bladjo-hotel.com`
+- rôle : reverse-proxy vers le frontend PM2
+- port cible : `127.0.0.1:4173`
+
+Extrait de config :
+
+```nginx
+server_name www.bladjo-hotel.com;
+
+location / {
+    proxy_pass http://127.0.0.1:4173;
+}
+```
+
+#### 2. Domaine admin
+
+- domaine : `myadmin.hotel-bladjo.com`
+- rôle : reverse-proxy vers le frontend PM2
+- port cible : `127.0.0.1:4173`
+
+Extrait de config :
+
+```nginx
+server_name myadmin.hotel-bladjo.com;
+
+location / {
+    proxy_pass http://127.0.0.1:4173;
+}
+```
+
+Le public et l’admin utilisent donc **le même frontend**, sur **deux domaines différents**.
+
+### À propos de la route `/admin`
+
+Le code frontend actuel **n’a pas de vraie route React `/admin`**.
+
+Les routes admin actuelles sont par exemple :
+
+- `/login`
+- `/dashboard`
+- `/rooms`
+- `/halls`
+
+Donc la configuration Nginx actuelle fait ceci :
+
+- `https://www.bladjo-hotel.com/admin` → redirige vers `https://myadmin.hotel-bladjo.com/login`
+- `https://myadmin.hotel-bladjo.com/admin` → redirige vers `https://myadmin.hotel-bladjo.com/login`
+
+Si tu veux une vraie interface admin sous un préfixe `/admin`, il faudra modifier les routes React.
+
+#### 3. Domaine API
+
+- domaine : `api.bladjo-hotel.com`
+- rôle : reverse-proxy vers le backend PM2
+- backend réel : `127.0.0.1:3100`
+
+Extrait de config :
+
+```nginx
+location /api/ {
+    proxy_pass http://127.0.0.1:3100;
+}
+
+location /uploads/ {
+    proxy_pass http://127.0.0.1:3100;
+}
+```
+
+### Résumé ultra simple
+
+- **frontend** = build dans `hotel-admin/dist` puis lancé par PM2 sur `4173`
+- **Nginx** = reverse-proxy le frontend et l’API
+- **PM2** = lance le frontend et le backend
+- **API** = exposée via `api.bladjo-hotel.com`
 
 ---
 
@@ -183,9 +297,9 @@ mysql -u root -p
 Créer la base et l’utilisateur :
 
 ```sql
-CREATE DATABASE bladjo_erp_prod CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'bladjo_erp_user'@'localhost' IDENTIFIED BY 'CHANGE_ME_STRONG_PASSWORD';
-GRANT ALL PRIVILEGES ON bladjo_erp_prod.* TO 'bladjo_erp_user'@'localhost';
+CREATE DATABASE bladjo_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'bladjo_user'@'localhost' IDENTIFIED BY 'CHANGE_ME_STRONG_PASSWORD';
+GRANT ALL PRIVILEGES ON bladjo_db.* TO 'bladjo_user'@'localhost';
 FLUSH PRIVILEGES;
 EXIT;
 ```
