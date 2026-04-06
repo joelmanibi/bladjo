@@ -1,0 +1,15 @@
+'use strict';
+
+const path = require('path');
+
+/**
+ * Sequelize CLI configuration.
+ * Tells the CLI where to find models, migrations, seeders, and the config.
+ */
+module.exports = {
+  'config':          path.resolve(__dirname, 'config', 'config.js'),
+  'models-path':     path.resolve(__dirname, 'models'),
+  'seeders-path':    path.resolve(__dirname, 'seeders'),
+  'migrations-path': path.resolve(__dirname, 'migrations'),
+};
+

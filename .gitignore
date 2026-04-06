@@ -1,0 +1,64 @@
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+Desktop.ini
+.vscode/
+.idea/
+
+# --- Logs ---
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- Environment / secrets ---
+.env
+.env.*
+!.env.example
+*.local
+
+# --- Root / workspace temp ---
+tmp/
+temp/
+.cache/
+coverage/
+
+# --- Frontend: Vite / React ---
+hotel-admin/node_modules/
+hotel-admin/dist/
+hotel-admin/.vite/
+
+# Optional local env files for frontend
+hotel-admin/.env
+hotel-admin/.env.*
+!hotel-admin/.env.example
+
+# --- Backend: Node / Express / Sequelize ---
+hotel-erp-backend/node_modules/
+hotel-erp-backend/coverage/
+
+# Local env files for backend
+hotel-erp-backend/.env
+hotel-erp-backend/.env.*
+!hotel-erp-backend/.env.example
+
+# SQLite / local DB dumps / backups (if used locally)
+hotel-erp-backend/*.sqlite
+hotel-erp-backend/*.sqlite3
+hotel-erp-backend/*.db
+hotel-erp-backend/*.sql
+hotel-erp-backend/*.bak
+
+# Uploaded/generated files (keep folders if needed with .gitkeep)
+hotel-erp-backend/uploads/receipts/*
+hotel-erp-backend/uploads/rooms/*
+hotel-erp-backend/uploads/halls/*
+hotel-erp-backend/uploads/apartments/*
+!hotel-erp-backend/uploads/**/.gitkeep
+
+# --- Build / tooling leftovers ---
+*.tgz
+*.zip
+*.tar
+*.gz
