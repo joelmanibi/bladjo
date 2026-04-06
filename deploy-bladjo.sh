@@ -117,12 +117,12 @@ curl -I -fsS "http://127.0.0.1:${FRONT_PORT}" >/dev/null && echo "✅ Frontend l
 curl -fsS "http://127.0.0.1:${BACK_PORT}/health" >/dev/null && echo "✅ Backend local OK"
 curl -fsS https://api.bladjo-hotel.com/health >/dev/null && echo "✅ API publique OK"
 curl -I -fsS https://www.bladjo-hotel.com >/dev/null && echo "✅ Front public OK"
-curl -I -fsS https://myadmin.hotel-bladjo.com >/dev/null && echo "✅ Front admin OK"
+curl -I -fsS https://www.bladjo-hotel.com/login >/dev/null && echo "✅ Front admin OK"
 
 echo
 echo "🎉 Déploiement terminé."
 echo "   - Frontend  : PM2 ($FRONT_NAME)"
 echo "   - Backend   : PM2 ($APP_NAME)"
 echo "   - Public    : https://www.bladjo-hotel.com"
-echo "   - Admin     : https://myadmin.hotel-bladjo.com"
+echo "   - Admin     : https://www.bladjo-hotel.com/login"
 echo "   - API       : https://api.bladjo-hotel.com"

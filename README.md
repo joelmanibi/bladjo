@@ -35,7 +35,7 @@ bladjo/
 
 - **Public** : `https://www.bladjo-hotel.com`
 - **API** : `https://api.bladjo-hotel.com`
-- **Admin** : `https://myadmin.hotel-bladjo.com`
+- **Admin** : `https://www.bladjo-hotel.com/login`
 
 ### Ports utilisés
 
@@ -52,7 +52,6 @@ Ce projet utilise donc :
 - **PM2** exécute le backend sur `127.0.0.1:3100`
 - **Nginx** reverse-proxy :
   - `www.bladjo-hotel.com` → frontend
-  - `myadmin.hotel-bladjo.com` → frontend
   - `api.bladjo-hotel.com` → backend
 
 ### Comment le frontend est déployé en production
@@ -61,7 +60,7 @@ Le frontend est :
 
 1. **buildé** avec Vite
 2. **servi par PM2** via `vite preview`
-3. **exposé par Nginx** sur les domaines public et admin
+3. **exposé par Nginx** sur le domaine public, qui contient aussi les routes admin
 
 En production, on build d’abord :
 
@@ -107,21 +106,21 @@ location / {
 
 #### 2. Domaine admin
 
-- domaine : `myadmin.hotel-bladjo.com`
+- domaine : `www.bladjo-hotel.com`
 - rôle : reverse-proxy vers le frontend PM2
 - port cible : `127.0.0.1:4173`
 
 Extrait de config :
 
 ```nginx
-server_name myadmin.hotel-bladjo.com;
+server_name www.bladjo-hotel.com;
 
 location / {
     proxy_pass http://127.0.0.1:4173;
 }
 ```
 
-Le public et l’admin utilisent donc **le même frontend**, sur **deux domaines différents**.
+Le public et l’admin utilisent donc **le même frontend**, sur **le même domaine**.
 
 ### À propos de la route `/admin`
 
@@ -136,8 +135,7 @@ Les routes admin actuelles sont par exemple :
 
 Donc la configuration Nginx actuelle fait ceci :
 
-- `https://www.bladjo-hotel.com/admin` → redirige vers `https://myadmin.hotel-bladjo.com/login`
-- `https://myadmin.hotel-bladjo.com/admin` → redirige vers `https://myadmin.hotel-bladjo.com/login`
+- `https://www.bladjo-hotel.com/admin` → redirige vers `https://www.bladjo-hotel.com/login`
 
 Si tu veux une vraie interface admin sous un préfixe `/admin`, il faudra modifier les routes React.
 
@@ -328,7 +326,7 @@ JWT_SECRET=CHANGE_ME_TO_A_LONG_RANDOM_SECRET_AT_LEAST_64_CHARACTERS
 JWT_EXPIRES_IN=7d
 JWT_REFRESH_SECRET=CHANGE_ME_TO_ANOTHER_LONG_RANDOM_REFRESH_SECRET
 JWT_REFRESH_EXPIRES_IN=30d
-CORS_ORIGIN=https://www.bladjo-hotel.com,https://myadmin.hotel-bladjo.com
+CORS_ORIGIN=https://www.bladjo-hotel.com
 ```
 
 ### 5. Préparer les DNS
@@ -337,7 +335,6 @@ Les entrées suivantes doivent pointer vers l’IP du VPS :
 
 - `www.bladjo-hotel.com`
 - `api.bladjo-hotel.com`
-- `myadmin.hotel-bladjo.com`
 
 ### 6. Préparer un bootstrap HTTP temporaire pour Certbot
 
@@ -355,7 +352,7 @@ cat > /etc/nginx/sites-available/bladjo-bootstrap <<'EOF'
 server {
     listen 80;
     listen [::]:80;
-    server_name www.bladjo-hotel.com api.bladjo-hotel.com myadmin.hotel-bladjo.com;
+    server_name www.bladjo-hotel.com api.bladjo-hotel.com;
 
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
@@ -381,7 +378,6 @@ certbot certonly --webroot -w /var/www/certbot \
   --cert-name bladjo-stack \
   -d www.bladjo-hotel.com \
   -d api.bladjo-hotel.com \
-  -d myadmin.hotel-bladjo.com \
   --email TON_EMAIL \
   --agree-tos \
   --no-eff-email
@@ -493,7 +489,7 @@ pm2 logs bladjo-front --lines 50
 pm2 logs bladjo-api --lines 50
 nginx -t
 curl -I https://www.bladjo-hotel.com
-curl -I https://myadmin.hotel-bladjo.com
+curl -I https://www.bladjo-hotel.com/login
 curl -I https://api.bladjo-hotel.com/health
 ```
 
@@ -521,7 +517,7 @@ Tout doit répondre sans erreur 502.
 
 ### Admin
 
-- connexion sur `https://myadmin.hotel-bladjo.com/login`
+- connexion sur `https://www.bladjo-hotel.com/login`
 - liste des chambres OK
 - liste des salles OK
 - liste des réservations chambres OK
@@ -612,7 +608,6 @@ Le frontend PM2 doit rester sur :
 Il doit être exposé publiquement uniquement via Nginx sur :
 
 - `https://www.bladjo-hotel.com`
-- `https://myadmin.hotel-bladjo.com`
 - `https://api.bladjo-hotel.com`
 
 ### 3. Les secrets ne doivent jamais être commités
