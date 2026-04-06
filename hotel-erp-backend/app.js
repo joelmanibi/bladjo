@@ -10,8 +10,18 @@ const errorHandler = require('./middleware/errorHandler');
 const app = express();
 
 // ─── CORS ────────────────────────────────────────────────────────────────────
+const allowedOrigins = (process.env.CORS_ORIGIN || '')
+  .split(',')
+  .map((value) => value.trim())
+  .filter(Boolean);
+
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN || '*',
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
