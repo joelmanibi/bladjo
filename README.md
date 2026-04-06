@@ -43,6 +43,7 @@ Sur le VPS, un autre projet utilise déjà les ports **3000** et **5000**.
 
 Ce projet utilise donc :
 
+- **frontend** : `127.0.0.1:4173`
 - **backend** : `127.0.0.1:3100`
 
 ### Architecture retenue
@@ -320,8 +321,8 @@ HOST=127.0.0.1
 PORT=3100
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_NAME=bladjo_erp_prod
-DB_USER=bladjo_erp_user
+DB_NAME=bladjo_db
+DB_USER=bladjo_user
 DB_PASSWORD=CHANGE_ME_TO_A_STRONG_DB_PASSWORD
 JWT_SECRET=CHANGE_ME_TO_A_LONG_RANDOM_SECRET_AT_LEAST_64_CHARACTERS
 JWT_EXPIRES_IN=7d
@@ -409,7 +410,8 @@ Ce script fait automatiquement :
 - migrations backend
 - installation frontend avec `npm ci`
 - build frontend
-- démarrage ou reload PM2
+- démarrage ou reload PM2 du frontend (`bladjo-front`)
+- démarrage ou reload PM2 du backend (`bladjo-api`)
 - installation de la conf Nginx
 - test Nginx
 - reload Nginx
@@ -465,6 +467,11 @@ pm2 start ecosystem.config.js --env production
 pm2 save
 ```
 
+Cette commande démarre les deux processus :
+
+- `bladjo-front`
+- `bladjo-api`
+
 ### Nginx
 
 ```bash
@@ -482,6 +489,7 @@ Exécuter ces commandes :
 
 ```bash
 pm2 status
+pm2 logs bladjo-front --lines 50
 pm2 logs bladjo-api --lines 50
 nginx -t
 curl -I https://www.bladjo-hotel.com
@@ -555,7 +563,9 @@ npm run preview
 
 ```bash
 pm2 status
+pm2 logs bladjo-front
 pm2 logs bladjo-api
+pm2 restart bladjo-front --update-env
 pm2 restart bladjo-api --update-env
 pm2 save
 ```
@@ -581,9 +591,13 @@ systemctl status nginx
 
 ## Notes importantes
 
-### 1. Ne pas lancer Vite en production
+### 1. Ne pas lancer `npm run dev` en production
 
-En production, le frontend doit être servi par **Nginx** depuis `hotel-admin/dist`.
+En production, le frontend doit être :
+
+- buildé avec `npm run build`
+- lancé par PM2 via `vite preview`
+- exposé au public uniquement via Nginx
 
 ### 2. Ne pas exposer le backend directement sur Internet
 
@@ -591,8 +605,14 @@ Le backend doit rester sur :
 
 - `127.0.0.1:3100`
 
+Le frontend PM2 doit rester sur :
+
+- `127.0.0.1:4173`
+
 Il doit être exposé publiquement uniquement via Nginx sur :
 
+- `https://www.bladjo-hotel.com`
+- `https://myadmin.hotel-bladjo.com`
 - `https://api.bladjo-hotel.com`
 
 ### 3. Les secrets ne doivent jamais être commités

@@ -3,6 +3,8 @@ set -Eeuo pipefail
 
 APP_NAME="bladjo-api"
 FRONT_NAME="bladjo-front"
+BACK_PORT="3100"
+FRONT_PORT="4173"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKEND_DIR="$ROOT_DIR/hotel-erp-backend"
 FRONTEND_DIR="$ROOT_DIR/hotel-admin"
@@ -83,6 +85,7 @@ npm ci
 
 log "Build frontend"
 npm run build
+require_file "$FRONTEND_DIR/dist/index.html"
 
 log "Déploiement PM2 frontend"
 cd "$ROOT_DIR"
@@ -91,6 +94,7 @@ if pm2 describe "$FRONT_NAME" >/dev/null 2>&1; then
 else
   pm2 start "$ECOSYSTEM_FILE" --env production --only "$FRONT_NAME"
 fi
+pm2 describe "$FRONT_NAME" >/dev/null 2>&1 || fail "Le processus PM2 frontend n'a pas démarré correctement."
 
 log "Déploiement PM2 backend"
 cd "$ROOT_DIR"
@@ -99,6 +103,7 @@ if pm2 describe "$APP_NAME" >/dev/null 2>&1; then
 else
   pm2 start "$ECOSYSTEM_FILE" --env production --only "$APP_NAME"
 fi
+pm2 describe "$APP_NAME" >/dev/null 2>&1 || fail "Le processus PM2 backend n'a pas démarré correctement."
 pm2 save
 
 log "Installation configuration Nginx"
@@ -108,8 +113,8 @@ $SUDO nginx -t
 $SUDO systemctl reload nginx
 
 log "Vérifications rapides"
-curl -I -fsS http://127.0.0.1:4173 >/dev/null && echo "✅ Frontend local PM2 OK"
-curl -fsS http://127.0.0.1:3100/health >/dev/null && echo "✅ Backend local OK"
+curl -I -fsS "http://127.0.0.1:${FRONT_PORT}" >/dev/null && echo "✅ Frontend local PM2 OK"
+curl -fsS "http://127.0.0.1:${BACK_PORT}/health" >/dev/null && echo "✅ Backend local OK"
 curl -fsS https://api.bladjo-hotel.com/health >/dev/null && echo "✅ API publique OK"
 curl -I -fsS https://www.bladjo-hotel.com >/dev/null && echo "✅ Front public OK"
 curl -I -fsS https://myadmin.hotel-bladjo.com >/dev/null && echo "✅ Front admin OK"
