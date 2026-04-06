@@ -1,278 +1,491 @@
-# Gesti ERP — Hôtel & Immobilier
+# Gesti ERP — Bladjo Hotel
 
-Système de gestion ERP complet pour hôtels et biens immobiliers.  
-Stack : **Node.js · Express · MySQL · Sequelize** (backend) + **React · Vite** (frontend).
+ERP hôtelier avec site public, interface d’administration et API REST.
+
+## Stack technique
+
+- **Backend** : Node.js, Express, Sequelize, MySQL
+- **Frontend** : React, Vite
+- **Production** : PM2, Nginx, Certbot
 
 ---
 
 ## Structure du projet
 
+```text
+bladjo/
+├── hotel-erp-backend/
+├── hotel-admin/
+├── ecosystem.config.js
+├── nginx-bladjo-hotel.conf
+└── deploy-bladjo.sh
 ```
-gesti-erp/
-├── hotel-erp-backend/   # API REST — Node.js / Express / Sequelize / MySQL
-└── hotel-admin/         # Interface admin — React 18 / Vite
-```
+
+### Fichiers importants à la racine
+
+- `ecosystem.config.js` : configuration PM2 du backend
+- `nginx-bladjo-hotel.conf` : configuration Nginx de production
+- `deploy-bladjo.sh` : script de déploiement automatisé
+
+---
+
+## Domaines et architecture de production
+
+### Domaines utilisés
+
+- **Public** : `https://www.bladjo-hotel.com`
+- **API** : `https://api.bladjo-hotel.com`
+- **Admin** : `https://myadmin.hotel-bladjo.com`
+
+### Ports utilisés
+
+Sur le VPS, un autre projet utilise déjà les ports **3000** et **5000**.
+
+Ce projet utilise donc :
+
+- **backend** : `127.0.0.1:3100`
+
+### Architecture retenue
+
+- **Nginx** sert le frontend React compilé depuis `hotel-admin/dist`
+- **PM2** exécute le backend Node.js
+- **Nginx** reverse-proxy l’API vers `127.0.0.1:3100`
+
+---
+
+## Fonctionnalités principales actuelles
+
+### Partie publique
+
+- liste des chambres
+- liste des salles de réception
+- pages détail chambre / salle
+- galerie d’images
+- calendrier de disponibilité
+- réservation publique avec statut **en attente de validation**
+
+### Partie admin
+
+- connexion admin
+- gestion des chambres
+- gestion des salles
+- gestion des réservations chambres
+- gestion des réservations salles
+- validation des demandes publiques
+- upload d’images chambres / salles
+
+### Règle métier importante
+
+Une demande envoyée depuis le site public n’est **pas confirmée automatiquement**.
+
+Elle est créée en **`PENDING`** puis doit être **validée sur la plateforme** par le gérant ou l’administrateur.
+
+---
+
+## Identifiants par défaut
+
+Si les seeders ont été exécutés :
+
+- **Email** : `admin@hotel-erp.com`
+- **Mot de passe** : `Admin@123`
+
+---
 
 ## Fichiers ignorés par Git
 
-Un fichier `.gitignore` racine est prévu pour éviter de versionner :
+Le projet contient un `.gitignore` racine qui ignore notamment :
 
-- les dépendances (`node_modules/`)
-- les builds frontend (`hotel-admin/dist/`)
-- les fichiers sensibles (`.env`, `.env.*`, secrets locaux)
-- les logs et caches temporaires
-- les uploads générés localement (`hotel-erp-backend/uploads/...`)
+- `node_modules/`
+- `dist/`
+- `.env`, `.env.*`
+- logs et caches
+- uploads générés localement
 
-> Important : les fichiers d'environnement et les médias uploadés ne doivent pas être considérés comme des artefacts à versionner. En production, ils doivent être gérés séparément (variables d'environnement, stockage persistant, sauvegardes).
-
----
-
-## Prérequis
-
-| Outil | Version minimale |
-|---|---|
-| Node.js | 18.x |
-| npm | 9.x |
-| MySQL | 8.x |
+Les secrets ne doivent jamais être versionnés.
 
 ---
 
-## 1 — Démarrage en développement
+## Développement local
 
-### 1.1 Backend — `hotel-erp-backend`
+### Backend
 
-#### a) Installer les dépendances
 ```bash
 cd hotel-erp-backend
+cp .env.example .env
 npm install
-```
-
-#### b) Créer le fichier d'environnement
-```bash
-cp .env.example .env   # ou créer manuellement le fichier .env
-```
-
-Contenu minimal du fichier `.env` :
-```env
-NODE_ENV=development
-
-# Serveur
-PORT=3000
-HOST=0.0.0.0
-
-# Base de données
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_NAME=hotel_erp_dev
-DB_USER=root
-DB_PASSWORD=votre_mot_de_passe
-
-# JWT
-JWT_SECRET=votre_secret_jwt_tres_long_et_aleatoire
-JWT_EXPIRES_IN=7d
-
-# CORS
-CORS_ORIGIN=http://localhost:5173
-```
-
-#### c) Créer la base de données MySQL
-```sql
-CREATE DATABASE hotel_erp_dev CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
-
-#### d) Appliquer toutes les migrations (crée les tables)
-```bash
 npm run db:migrate
-```
-
-#### e) Insérer les données de départ (seeders)
-```bash
 npm run db:seed
-```
-
-> Les seeders insèrent : un compte **admin**, 2 immeubles (IM1, IM2), 5 niveaux et 1 appartement exemple (AP1).
-
-#### f) Lancer le serveur en mode développement (rechargement auto)
-```bash
 npm run dev
 ```
 
-API disponible sur → **http://localhost:3000**  
-Health check → **http://localhost:3000/health**
+Backend disponible sur :
 
----
+- `http://localhost:3100`
+- `http://localhost:3100/health`
 
-### 1.2 Frontend — `hotel-admin`
+### Frontend
 
-#### a) Installer les dépendances
+Dans un autre terminal :
+
 ```bash
 cd hotel-admin
 npm install
-```
-
-#### b) Vérifier l'URL de l'API
-Dans `src/services/api.js`, l'URL de base doit pointer vers le backend :
-```js
-baseURL: 'http://localhost:3000/api'
-```
-
-#### c) Lancer le serveur de développement Vite
-```bash
 npm run dev
 ```
 
-Interface disponible sur → **http://localhost:5173**
+Frontend disponible sur :
+
+- `http://localhost:5173`
 
 ---
 
-### 1.3 Compte de connexion par défaut (seeder)
+## Déploiement production sur VPS — étapes exactes
 
-| Champ | Valeur |
-|---|---|
-| Email | `admin@hotel-erp.com` |
-| Mot de passe | `Admin@123` |
-| Rôle backend | `ADMIN` → `SUPER_ADMIN` côté frontend |
+Cette section est écrite pour être suivie **commande par commande**.
 
----
+### 1. Pré-requis du serveur
 
-## 2 — Démarrage en production
+Le VPS doit avoir :
 
-### 2.1 Backend
+- Nginx
+- Node.js 18+
+- npm
+- PM2
+- MySQL
+- Certbot
 
-#### a) Créer la base de données de production
-```sql
-CREATE DATABASE hotel_erp_prod CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+Si PM2 n’est pas installé :
+
+```bash
+npm install -g pm2
 ```
 
-#### b) Configurer les variables d'environnement sur le serveur
+### 2. Copier le projet dans `/opt/bladjo`
+
+Le projet doit être présent ici :
+
+- `/opt/bladjo`
+
+Puis entrer dans le dossier :
+
+```bash
+cd /opt/bladjo
+```
+
+### 3. Créer la base MySQL de production
+
+Se connecter à MySQL :
+
+```bash
+mysql -u root -p
+```
+
+Créer la base et l’utilisateur :
+
+```sql
+CREATE DATABASE bladjo_erp_prod CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'bladjo_erp_user'@'localhost' IDENTIFIED BY 'CHANGE_ME_STRONG_PASSWORD';
+GRANT ALL PRIVILEGES ON bladjo_erp_prod.* TO 'bladjo_erp_user'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+```
+
+### 4. Créer le fichier d’environnement backend
+
+```bash
+cd /opt/bladjo/hotel-erp-backend
+cp .env.production.example .env
+nano .env
+```
+
+Renseigner au minimum dans `.env` :
+
 ```env
 NODE_ENV=production
-
-PORT=3000
-HOST=0.0.0.0
-
+HOST=127.0.0.1
+PORT=3100
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_NAME=hotel_erp_prod
-DB_USER=erp_user
-DB_PASSWORD=mot_de_passe_fort
-
-JWT_SECRET=secret_jwt_64_caracteres_minimum
+DB_NAME=bladjo_erp_prod
+DB_USER=bladjo_erp_user
+DB_PASSWORD=CHANGE_ME_TO_A_STRONG_DB_PASSWORD
+JWT_SECRET=CHANGE_ME_TO_A_LONG_RANDOM_SECRET_AT_LEAST_64_CHARACTERS
 JWT_EXPIRES_IN=7d
-
-CORS_ORIGIN=https://votre-domaine.com
+JWT_REFRESH_SECRET=CHANGE_ME_TO_ANOTHER_LONG_RANDOM_REFRESH_SECRET
+JWT_REFRESH_EXPIRES_IN=30d
+CORS_ORIGIN=https://www.bladjo-hotel.com,https://myadmin.hotel-bladjo.com
 ```
 
-#### c) Installer les dépendances de production uniquement
+### 5. Préparer les DNS
+
+Les entrées suivantes doivent pointer vers l’IP du VPS :
+
+- `www.bladjo-hotel.com`
+- `api.bladjo-hotel.com`
+- `myadmin.hotel-bladjo.com`
+
+### 6. Préparer un bootstrap HTTP temporaire pour Certbot
+
+Créer le dossier de challenge :
+
 ```bash
-cd hotel-erp-backend
-npm install --omit=dev
+mkdir -p /var/www/certbot
+chown -R www-data:www-data /var/www/certbot
 ```
 
-#### d) Appliquer les migrations
+Créer une configuration Nginx temporaire HTTP uniquement :
+
 ```bash
-NODE_ENV=production npx sequelize-cli db:migrate
+cat > /etc/nginx/sites-available/bladjo-bootstrap <<'EOF'
+server {
+    listen 80;
+    listen [::]:80;
+    server_name www.bladjo-hotel.com api.bladjo-hotel.com myadmin.hotel-bladjo.com;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 200 'bladjo bootstrap ok';
+        add_header Content-Type text/plain;
+    }
+}
+EOF
+ln -sfn /etc/nginx/sites-available/bladjo-bootstrap /etc/nginx/sites-enabled/bladjo-bootstrap
+nginx -t
+systemctl reload nginx
 ```
 
-#### e) Insérer le compte admin initial (si première installation)
+### 7. Générer le certificat SSL
+
+Lancer exactement cette commande :
+
 ```bash
-NODE_ENV=production npx sequelize-cli db:seed --seed 20260222000002-admin-user.js
+certbot certonly --webroot -w /var/www/certbot \
+  --cert-name bladjo-stack \
+  -d www.bladjo-hotel.com \
+  -d api.bladjo-hotel.com \
+  -d myadmin.hotel-bladjo.com \
+  --email TON_EMAIL \
+  --agree-tos \
+  --no-eff-email
 ```
 
-#### f) Démarrer le serveur
+Tester le renouvellement :
+
 ```bash
-npm start
-# ou avec PM2 (recommandé en production) :
-pm2 start server.js --name gesti-erp-api
+certbot renew --dry-run
+```
+
+### 8. Lancer le déploiement automatisé
+
+Depuis la racine du projet :
+
+```bash
+cd /opt/bladjo
+chmod +x deploy-bladjo.sh
+./deploy-bladjo.sh
+```
+
+Ce script fait automatiquement :
+
+- création de `hotel-admin/.env.production`
+- installation backend avec `npm ci`
+- migrations backend
+- installation frontend avec `npm ci`
+- build frontend
+- démarrage ou reload PM2
+- installation de la conf Nginx
+- test Nginx
+- reload Nginx
+
+### 9. Supprimer le bootstrap HTTP temporaire puis activer PM2 au redémarrage
+
+```bash
+rm -f /etc/nginx/sites-enabled/bladjo-bootstrap
+rm -f /etc/nginx/sites-available/bladjo-bootstrap
+nginx -t
+systemctl reload nginx
+```
+
+Puis :
+
+Après le premier déploiement :
+
+```bash
+pm2 startup
 pm2 save
 ```
 
+Si PM2 affiche une commande supplémentaire, exécute-la exactement.
+
 ---
 
-### 2.2 Frontend
+## Déploiement manuel si tu ne veux pas utiliser le script
 
-#### a) Construire le bundle de production
+### Backend
+
 ```bash
-cd hotel-admin
-npm install --omit=dev
+cd /opt/bladjo/hotel-erp-backend
+npm ci
+npm run db:migrate
+```
+
+### Frontend
+
+```bash
+cd /opt/bladjo/hotel-admin
+cat > .env.production <<'EOF'
+VITE_API_BASE_URL=https://api.bladjo-hotel.com/api
+EOF
+npm ci
 npm run build
 ```
 
-Le dossier `dist/` est généré — il contient les fichiers statiques à servir.
+### PM2
 
-#### b) Servir avec Nginx (recommandé)
+```bash
+cd /opt/bladjo
+pm2 start ecosystem.config.js --env production
+pm2 save
+```
 
-Exemple de configuration Nginx :
-```nginx
-server {
-    listen 80;
-    server_name votre-domaine.com;
+### Nginx
 
-    # Frontend React (SPA)
-    root /var/www/gesti-erp/hotel-admin/dist;
-    index index.html;
-
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-
-    # Proxy vers l'API backend
-    location /api/ {
-        proxy_pass http://127.0.0.1:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
+```bash
+mv /opt/bladjo/nginx-bladjo-hotel.conf /etc/nginx/sites-available/bladjo-hotel
+ln -sfn /etc/nginx/sites-available/bladjo-hotel /etc/nginx/sites-enabled/bladjo-hotel
+nginx -t
+systemctl reload nginx
 ```
 
 ---
 
-## 3 — Commandes utiles
+## Vérifications après déploiement
+
+Exécuter ces commandes :
+
+```bash
+pm2 status
+pm2 logs bladjo-api --lines 50
+nginx -t
+curl -I https://www.bladjo-hotel.com
+curl -I https://myadmin.hotel-bladjo.com
+curl -I https://api.bladjo-hotel.com/health
+```
+
+Tout doit répondre sans erreur 502.
+
+---
+
+## Checklist fonctionnelle post-déploiement
+
+### Public
+
+- la page d’accueil s’ouvre
+- la liste des chambres s’affiche
+- la liste des salles s’affiche
+- les images s’affichent
+- les détails chambre / salle s’ouvrent
+- le calendrier de disponibilité s’affiche
+- la sélection d’intervalle fonctionne
+
+### Réservations publiques
+
+- une réservation chambre peut être envoyée
+- une réservation salle peut être envoyée
+- le message affiché indique **en attente de validation**
+
+### Admin
+
+- connexion sur `https://myadmin.hotel-bladjo.com/login`
+- liste des chambres OK
+- liste des salles OK
+- liste des réservations chambres OK
+- liste des réservations salles OK
+- les demandes publiques arrivent en **attente de validation**
+- le gérant / admin peut cliquer sur **Valider**
+
+### API / serveur
+
+- `https://api.bladjo-hotel.com/health` répond correctement
+- pas d’erreur CORS dans le navigateur
+- pas d’erreur critique dans `pm2 logs`
+
+---
+
+## Commandes utiles
 
 ### Backend
+
 ```bash
-# Appliquer toutes les migrations
+cd hotel-erp-backend
 npm run db:migrate
-
-# Annuler toutes les migrations
 npm run db:migrate:undo
-
-# Lancer tous les seeders
 npm run db:seed
-
-# Annuler tous les seeders
 npm run db:seed:undo
-
-# Réinitialiser complètement la base (undo + migrate + seed)
 npm run db:reset
 ```
 
 ### Frontend
+
 ```bash
-npm run dev       # Serveur de développement (port 5173)
-npm run build     # Build de production → dist/
-npm run preview   # Prévisualiser le build de production localement
+cd hotel-admin
+npm run dev
+npm run build
+npm run preview
+```
+
+### PM2
+
+```bash
+pm2 status
+pm2 logs bladjo-api
+pm2 restart bladjo-api --update-env
+pm2 save
+```
+
+### Nginx
+
+```bash
+nginx -t
+systemctl reload nginx
+systemctl status nginx
 ```
 
 ---
 
-## 4 — Endpoints API principaux
+## Fichiers de configuration de production présents dans le dépôt
 
-| Module | Base URL |
-|---|---|
-| Authentification | `POST /api/auth/login` |
-| Chambres | `/api/rooms` |
-| Réservations | `/api/bookings` |
-| Immeubles | `/api/buildings` |
-| Niveaux | `/api/floors` |
-| Appartements | `/api/apartments` |
-| Locataires | `/api/tenants` |
-| Baux | `/api/leases` |
-| Salles | `/api/halls` |
-| Stock | `/api/items` |
-| Bons d'achat | `/api/purchase-requests` |
-| Employés | `/api/employees` |
-| Paiements | `/api/payments` |
-| Dashboard | `GET /api/dashboard` |
+- `ecosystem.config.js`
+- `nginx-bladjo-hotel.conf`
+- `deploy-bladjo.sh`
+- `hotel-erp-backend/.env.production.example`
+
+---
+
+## Notes importantes
+
+### 1. Ne pas lancer Vite en production
+
+En production, le frontend doit être servi par **Nginx** depuis `hotel-admin/dist`.
+
+### 2. Ne pas exposer le backend directement sur Internet
+
+Le backend doit rester sur :
+
+- `127.0.0.1:3100`
+
+Il doit être exposé publiquement uniquement via Nginx sur :
+
+- `https://api.bladjo-hotel.com`
+
+### 3. Les secrets ne doivent jamais être commités
+
+Ne versionne jamais :
+
+- `.env`
+- mots de passe MySQL
+- secrets JWT réels
 
