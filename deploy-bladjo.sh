@@ -45,6 +45,40 @@ require_file() {
   [[ -f "$1" ]] || fail "Fichier introuvable : $1"
 }
 
+wait_for_http_head() {
+  local url="$1"
+  local label="$2"
+  local retries="${3:-20}"
+  local delay="${4:-2}"
+
+  for ((i=1; i<=retries; i++)); do
+    if curl -I -fsS "$url" >/dev/null 2>&1; then
+      echo "✅ $label"
+      return 0
+    fi
+    sleep "$delay"
+  done
+
+  fail "Vérification échouée : $label ($url)"
+}
+
+wait_for_http_get() {
+  local url="$1"
+  local label="$2"
+  local retries="${3:-20}"
+  local delay="${4:-2}"
+
+  for ((i=1; i<=retries; i++)); do
+    if curl -fsS "$url" >/dev/null 2>&1; then
+      echo "✅ $label"
+      return 0
+    fi
+    sleep "$delay"
+  done
+
+  fail "Vérification échouée : $label ($url)"
+}
+
 trap 'echo "❌ Erreur à la ligne $LINENO" >&2' ERR
 
 for cmd in npm pm2 nginx systemctl curl; do
@@ -101,11 +135,11 @@ $SUDO nginx -t
 $SUDO systemctl reload nginx
 
 log "Vérifications rapides"
-curl -I -fsS "http://127.0.0.1:${FRONT_PORT}" >/dev/null && echo "✅ Frontend local PM2 OK"
-curl -fsS "http://127.0.0.1:${BACK_PORT}/health" >/dev/null && echo "✅ Backend local OK"
-curl -fsS https://api.bladjo-hotel.com/health >/dev/null && echo "✅ API publique OK"
-curl -I -fsS https://www.bladjo-hotel.com >/dev/null && echo "✅ Front public OK"
-curl -I -fsS https://www.bladjo-hotel.com/login >/dev/null && echo "✅ Front admin OK"
+wait_for_http_head "http://127.0.0.1:${FRONT_PORT}" "Frontend local PM2 OK"
+wait_for_http_get "http://127.0.0.1:${BACK_PORT}/health" "Backend local OK"
+wait_for_http_get "https://api.bladjo-hotel.com/health" "API publique OK"
+wait_for_http_head "https://www.bladjo-hotel.com" "Front public OK"
+wait_for_http_head "https://www.bladjo-hotel.com/login" "Front admin OK"
 
 echo
 echo "🎉 Déploiement terminé."
