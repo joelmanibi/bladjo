@@ -329,6 +329,15 @@ JWT_REFRESH_EXPIRES_IN=30d
 CORS_ORIGIN=https://www.bladjo-hotel.com
 ```
 
+### 4.b Créer le fichier d’environnement frontend
+
+```bash
+cd /opt/bladjo/hotel-admin
+cat > .env.production <<'EOF'
+VITE_API_BASE_URL=https://api.bladjo-hotel.com/api
+EOF
+```
+
 ### 5. Préparer les DNS
 
 Les entrées suivantes doivent pointer vers l’IP du VPS :
@@ -401,7 +410,6 @@ chmod +x deploy-bladjo.sh
 
 Ce script fait automatiquement :
 
-- création de `hotel-admin/.env.production`
 - installation backend avec `npm ci`
 - migrations backend
 - installation frontend avec `npm ci`
@@ -411,6 +419,13 @@ Ce script fait automatiquement :
 - installation de la conf Nginx
 - test Nginx
 - reload Nginx
+
+Ce script **ne crée pas** les fichiers d’environnement.
+
+Avant de l’exécuter, tu dois avoir créé manuellement :
+
+- `hotel-erp-backend/.env`
+- `hotel-admin/.env.production`
 
 ### 9. Supprimer le bootstrap HTTP temporaire puis activer PM2 au redémarrage
 

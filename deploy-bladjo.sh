@@ -13,7 +13,6 @@ NGINX_SOURCE="$ROOT_DIR/nginx-bladjo-hotel.conf"
 NGINX_TARGET="/etc/nginx/sites-available/bladjo-hotel"
 NGINX_ENABLED="/etc/nginx/sites-enabled/bladjo-hotel"
 BACKEND_ENV_FILE="$BACKEND_DIR/.env"
-BACKEND_ENV_EXAMPLE="$BACKEND_DIR/.env.production.example"
 FRONTEND_ENV_FILE="$FRONTEND_DIR/.env.production"
 CERT_DIR="/etc/letsencrypt/live/bladjo-stack"
 
@@ -54,23 +53,12 @@ done
 
 require_file "$ECOSYSTEM_FILE"
 require_file "$NGINX_SOURCE"
-
-if [[ ! -f "$BACKEND_ENV_FILE" ]]; then
-  if [[ -f "$BACKEND_ENV_EXAMPLE" ]]; then
-    cp "$BACKEND_ENV_EXAMPLE" "$BACKEND_ENV_FILE"
-    fail "Le fichier $BACKEND_ENV_FILE vient d'être créé. Renseigne les vrais secrets puis relance le script."
-  fi
-  fail "Le fichier $BACKEND_ENV_FILE est requis."
-fi
+require_file "$BACKEND_ENV_FILE"
+require_file "$FRONTEND_ENV_FILE"
 
 if [[ ! -f "$CERT_DIR/fullchain.pem" || ! -f "$CERT_DIR/privkey.pem" ]]; then
   fail "Certificat SSL manquant dans $CERT_DIR. Exécute Certbot avant ce script."
 fi
-
-log "Création du .env.production frontend"
-cat > "$FRONTEND_ENV_FILE" <<'EOF'
-VITE_API_BASE_URL=https://api.bladjo-hotel.com/api
-EOF
 
 log "Installation backend"
 cd "$BACKEND_DIR"
