@@ -3,6 +3,19 @@
 const { Apartment, Building, Floor, Lease, Tenant } = require('../../models');
 const ApiError = require('../../utils/ApiError');
 
+const buildLegacyApartmentFields = ({ code, rentAmount, buildingName, currentAddress = null }) => {
+  const normalizedCode = String(code || '').trim().toUpperCase();
+  const normalizedRent = Number(rentAmount);
+
+  return {
+    name: normalizedCode,
+    address: buildingName
+      ? `${buildingName} - ${normalizedCode}`
+      : currentAddress || `Appartement ${normalizedCode}`,
+    rentPrice: Number.isFinite(normalizedRent) ? normalizedRent : null,
+  };
+};
+
 // ── Eager-load helper ─────────────────────────────────────────────────────────
 const withRelations = {
   include: [
@@ -111,8 +124,9 @@ const create = async (payload) => {
   }
 
   // Validate FK existence if provided
+  let building = null;
   if (buildingId) {
-    const building = await Building.findByPk(buildingId);
+    building = await Building.findByPk(buildingId);
     if (!building) throw ApiError.notFound(`Immeuble #${buildingId} introuvable`);
   }
   if (floorId) {
@@ -120,7 +134,14 @@ const create = async (payload) => {
     if (!floor) throw ApiError.notFound(`Niveau #${floorId} introuvable`);
   }
 
+  const legacyFields = buildLegacyApartmentFields({
+    code,
+    rentAmount,
+    buildingName: building?.name || null,
+  });
+
   const apartment = await Apartment.create({
+    ...legacyFields,
     code:        String(code).trim().toUpperCase(),
     buildingId:  buildingId  ? Number(buildingId)  : null,
     floorId:     floorId     ? Number(floorId)     : null,
@@ -148,16 +169,29 @@ const update = async (id, payload) => {
   const apartment = await findById(id);
   const { code, buildingId, floorId, rooms, bathrooms, area, rentAmount, status, description, images } = payload;
 
+  let building = apartment.building || null;
   if (buildingId !== undefined && buildingId !== null) {
-    const building = await Building.findByPk(buildingId);
+    building = await Building.findByPk(buildingId);
     if (!building) throw ApiError.notFound(`Immeuble #${buildingId} introuvable`);
+  } else if (buildingId === null) {
+    building = null;
   }
   if (floorId !== undefined && floorId !== null) {
     const floor = await Floor.findByPk(floorId);
     if (!floor) throw ApiError.notFound(`Niveau #${floorId} introuvable`);
   }
 
+  const nextCode = code !== undefined ? code : apartment.code;
+  const nextRentAmount = rentAmount !== undefined ? rentAmount : apartment.rentAmount;
+  const legacyFields = buildLegacyApartmentFields({
+    code: nextCode,
+    rentAmount: nextRentAmount,
+    buildingName: building?.name || null,
+    currentAddress: apartment.address || null,
+  });
+
   await apartment.update({
+    ...legacyFields,
     ...(code        !== undefined && { code: String(code).trim().toUpperCase() }),
     ...(buildingId  !== undefined && { buildingId  }),
     ...(floorId     !== undefined && { floorId     }),

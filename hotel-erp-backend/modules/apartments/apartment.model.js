@@ -22,6 +22,19 @@ module.exports = (sequelize) => {
         autoIncrement: true,
         primaryKey:    true,
       },
+      // Legacy columns kept for backward compatibility with existing DB schema.
+      name: {
+        type:      DataTypes.STRING(100),
+        allowNull: true,
+      },
+      address: {
+        type:      DataTypes.STRING(255),
+        allowNull: true,
+      },
+      rentPrice: {
+        type:      DataTypes.DECIMAL(10, 2),
+        allowNull: true,
+      },
       buildingId: {
         type:       DataTypes.INTEGER,
         allowNull:  true,
