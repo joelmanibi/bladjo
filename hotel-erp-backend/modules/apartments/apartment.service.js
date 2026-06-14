@@ -110,11 +110,11 @@ const findByFloorId = async (floorId) => {
 /**
  * Create a new apartment.
  *
- * @param {{ code: string, buildingId?: number, floorId?: number, rooms?: number, bathrooms?: number, area?: number, rentAmount?: number, status?: string, description?: string }} payload
+ * @param {{ code: string, buildingId?: number, floorId?: number, rooms?: number, bedrooms?: number, livingRooms?: number, bathrooms?: number, area?: number, rentAmount?: number, status?: string, description?: string }} payload
  * @returns {Promise<Apartment>}
  */
 const create = async (payload) => {
-  const { code, buildingId, floorId, rooms, bathrooms, area, rentAmount, status, description, images } = payload;
+  const { code, buildingId, floorId, rooms, bedrooms, livingRooms, bathrooms, area, rentAmount, status, description, images } = payload;
 
   if (!code || !String(code).trim()) {
     throw ApiError.badRequest("Le code de l'appartement est obligatoire");
@@ -146,6 +146,8 @@ const create = async (payload) => {
     buildingId:  buildingId  ? Number(buildingId)  : null,
     floorId:     floorId     ? Number(floorId)     : null,
     rooms:       rooms       !== undefined ? Number(rooms)      : null,
+    bedrooms:    bedrooms    !== undefined ? Number(bedrooms)   : null,
+    livingRooms: livingRooms !== undefined ? Number(livingRooms): null,
     bathrooms:   bathrooms   !== undefined ? Number(bathrooms)  : null,
     area:        area        !== undefined ? parseFloat(area)   : null,
     rentAmount:  Number(rentAmount),
@@ -167,7 +169,7 @@ const create = async (payload) => {
  */
 const update = async (id, payload) => {
   const apartment = await findById(id);
-  const { code, buildingId, floorId, rooms, bathrooms, area, rentAmount, status, description, images } = payload;
+  const { code, buildingId, floorId, rooms, bedrooms, livingRooms, bathrooms, area, rentAmount, status, description, images } = payload;
 
   let building = apartment.building || null;
   if (buildingId !== undefined && buildingId !== null) {
@@ -196,6 +198,8 @@ const update = async (id, payload) => {
     ...(buildingId  !== undefined && { buildingId  }),
     ...(floorId     !== undefined && { floorId     }),
     ...(rooms       !== undefined && { rooms       }),
+    ...(bedrooms    !== undefined && { bedrooms    }),
+    ...(livingRooms !== undefined && { livingRooms }),
     ...(bathrooms   !== undefined && { bathrooms   }),
     ...(area        !== undefined && { area        }),
     ...(rentAmount  !== undefined && { rentAmount  }),

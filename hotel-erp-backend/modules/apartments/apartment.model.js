@@ -68,6 +68,22 @@ module.exports = (sequelize) => {
           min:   { args: [1], msg: "Le nombre de pièces doit être >= 1" },
         },
       },
+      bedrooms: {
+        type:      DataTypes.INTEGER,
+        allowNull: true,
+        validate: {
+          isInt: { msg: 'Le nombre de chambres doit être un entier' },
+          min:   { args: [0], msg: 'Le nombre de chambres doit être >= 0' },
+        },
+      },
+      livingRooms: {
+        type:      DataTypes.INTEGER,
+        allowNull: true,
+        validate: {
+          isInt: { msg: 'Le nombre de salons doit être un entier' },
+          min:   { args: [0], msg: 'Le nombre de salons doit être >= 0' },
+        },
+      },
       bathrooms: {
         type:      DataTypes.INTEGER,
         allowNull: true,

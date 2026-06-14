@@ -8,7 +8,7 @@ const IMG_BASE_URL = 'http://localhost:3000/uploads/apartments';
 const MAX_IMAGES   = 5;
 
 const EMPTY_FORM = {
-  buildingId: '', floorId: '', code: '', rooms: '', bathrooms: '',
+  buildingId: '', floorId: '', code: '', rooms: '', bedrooms: '', livingRooms: '', bathrooms: '',
   area: '', rentAmount: '', status: 'AVAILABLE',
 };
 
@@ -100,6 +100,8 @@ export default function AppartementsPage() {
       floorId:    apt.floorId    !== null ? String(apt.floorId)    : '',
       code:       apt.code       || '',
       rooms:      apt.rooms      !== null ? String(apt.rooms)      : '',
+      bedrooms:   apt.bedrooms   !== null ? String(apt.bedrooms)   : '',
+      livingRooms: apt.livingRooms !== null ? String(apt.livingRooms) : '',
       bathrooms:  apt.bathrooms  !== null ? String(apt.bathrooms)  : '',
       area:       apt.area       !== null ? String(apt.area)       : '',
       rentAmount: apt.rentAmount !== null ? String(apt.rentAmount) : '',
@@ -157,6 +159,8 @@ export default function AppartementsPage() {
       fd.append('buildingId', form.buildingId);
       fd.append('floorId',    form.floorId);
       fd.append('rooms',      form.rooms);
+      fd.append('bedrooms',   form.bedrooms);
+      fd.append('livingRooms', form.livingRooms);
       fd.append('bathrooms',  form.bathrooms);
       fd.append('area',       form.area);
       fd.append('rentAmount', form.rentAmount);
@@ -210,7 +214,7 @@ export default function AppartementsPage() {
             <table style={s.table}>
               <thead>
                 <tr>
-                  {['#', 'Code', 'Immeuble', 'Niveau', 'Pièces', 'Douches', 'Surface', 'Loyer/mois', 'Statut', 'Actions'].map((h) => (
+                  {['#', 'Code', 'Immeuble', 'Niveau', 'Pièces', 'Chambres', 'Salons', 'Douches', 'Surface', 'Loyer/mois', 'Statut', 'Actions'].map((h) => (
                     <th key={h} style={s.th}>{h}</th>
                   ))}
                 </tr>
@@ -230,6 +234,8 @@ export default function AppartementsPage() {
                       <td style={s.td}>{a.building?.name || <span style={s.empty}>—</span>}</td>
                       <td style={s.td}>{a.floor?.label   || <span style={s.empty}>—</span>}</td>
                       <td style={s.td}>{a.rooms     !== null ? a.rooms     : <span style={s.empty}>—</span>}</td>
+                      <td style={s.td}>{a.bedrooms  !== null ? a.bedrooms  : <span style={s.empty}>—</span>}</td>
+                      <td style={s.td}>{a.livingRooms !== null ? a.livingRooms : <span style={s.empty}>—</span>}</td>
                       <td style={s.td}>{a.bathrooms !== null ? a.bathrooms : <span style={s.empty}>—</span>}</td>
                       <td style={s.td}>{a.area      !== null ? `${a.area} m²` : <span style={s.empty}>—</span>}</td>
                       <td style={s.td}>
@@ -309,12 +315,26 @@ export default function AppartementsPage() {
                 </div>
               </div>
 
-              {/* Pièces / Douches */}
+              {/* Pièces / Chambres */}
               <div style={s.row}>
                 <div style={s.col}>
                   <label style={s.label}>Nombre de pièces</label>
                   <input style={s.input} name="rooms" type="number" min="1"
                     value={form.rooms} onChange={handleChange} placeholder="ex : 3" />
+                </div>
+                <div style={s.col}>
+                  <label style={s.label}>Nombre de chambres</label>
+                  <input style={s.input} name="bedrooms" type="number" min="0"
+                    value={form.bedrooms} onChange={handleChange} placeholder="ex : 2" />
+                </div>
+              </div>
+
+              {/* Salons / Douches */}
+              <div style={s.row}>
+                <div style={s.col}>
+                  <label style={s.label}>Nombre de salons</label>
+                  <input style={s.input} name="livingRooms" type="number" min="0"
+                    value={form.livingRooms} onChange={handleChange} placeholder="ex : 1" />
                 </div>
                 <div style={s.col}>
                   <label style={s.label}>Nombre de douches</label>
@@ -467,7 +487,7 @@ const s = {
   searchInput: { width: '100%', padding: '10px 14px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' },
   card:        { background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden' },
   tableWrap:   { overflowX: 'auto' },
-  table:       { width: '100%', borderCollapse: 'collapse', minWidth: '900px' },
+  table:       { width: '100%', borderCollapse: 'collapse', minWidth: '1100px' },
   th:          { padding: '11px 16px', textAlign: 'left', fontSize: '11px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', background: '#f8fafc', borderBottom: '1px solid #e2e8f0' },
   tr:          { borderBottom: '1px solid #f1f5f9' },
   td:          { padding: '12px 16px', fontSize: '14px', color: '#1e293b', verticalAlign: 'middle' },

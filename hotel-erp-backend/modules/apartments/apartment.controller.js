@@ -15,6 +15,8 @@ const parseMultipartBody = (body) => ({
   buildingId:  body.buildingId  && body.buildingId  !== '' ? Number(body.buildingId)  : null,
   floorId:     body.floorId     && body.floorId     !== '' ? Number(body.floorId)     : null,
   rooms:       body.rooms       && body.rooms       !== '' ? Number(body.rooms)       : null,
+  bedrooms:    body.bedrooms    && body.bedrooms    !== '' ? Number(body.bedrooms)    : null,
+  livingRooms: body.livingRooms && body.livingRooms !== '' ? Number(body.livingRooms) : null,
   bathrooms:   body.bathrooms   && body.bathrooms   !== '' ? Number(body.bathrooms)   : null,
   area:        body.area        && body.area        !== '' ? parseFloat(body.area)    : null,
   rentAmount:  body.rentAmount  && body.rentAmount  !== '' ? Number(body.rentAmount)  : null,

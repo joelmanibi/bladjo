@@ -17,7 +17,7 @@ const BACKEND_ROLE_ROUTE_OVERRIDES = {
 // ─── Allowed Routes per Frontend Role ────────────────────────────────────────
 export const ALLOWED_ROUTES = {
   SUPER_ADMIN: ['*'],
-  GERANT:      ['/dashboard', '/rooms', '/halls', '/hall-bookings', '/stock', '/employees', '/reservations'],
+  GERANT:      ['/dashboard', '/rooms', '/halls', '/hall-bookings', '/stock', '/employees', '/reservations', '/immeubles', '/appartements', '/locataires', '/loyers', '/paiements'],
   RECEPTION:   ['/dashboard', '/rooms', '/halls', '/hall-bookings', '/reservations'],
 };
 
