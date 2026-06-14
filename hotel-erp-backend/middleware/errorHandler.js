@@ -1,5 +1,7 @@
 'use strict';
 
+const logger = require('../utils/logger');
+
 /**
  * Centralised error-handling middleware.
  * Must be registered LAST in app.js (after all routes).
@@ -11,7 +13,7 @@
  *
  *   — or use the ApiError helper in utils/ApiError.js
  */
-const errorHandler = (err, _req, res, _next) => {
+const errorHandler = (err, req, res, _next) => {
   // ── Determine status code ──────────────────────────────────────────────────
   let statusCode = err.statusCode || err.status || 500;
 
@@ -39,10 +41,13 @@ const errorHandler = (err, _req, res, _next) => {
   }
 
   // ── Log in development ─────────────────────────────────────────────────────
-  if (process.env.NODE_ENV === 'development') {
-    console.error(`[${new Date().toISOString()}] ${statusCode} — ${message}`);
-    if (err.stack) console.error(err.stack);
-  }
+  logger.error('Request failed', {
+    statusCode,
+    message,
+    method: req.method,
+    path: req.originalUrl,
+    stack: err.stack,
+  });
 
   // ── Send response ──────────────────────────────────────────────────────────
   const body = {

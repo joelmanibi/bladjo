@@ -2,6 +2,7 @@
 
 require('dotenv').config();
 const { Sequelize } = require('sequelize');
+const logger = require('../utils/logger');
 
 const sequelize = new Sequelize(
   process.env.DB_NAME,
@@ -34,9 +35,9 @@ const sequelize = new Sequelize(
 const connectDB = async () => {
   try {
     await sequelize.authenticate();
-    console.log('✅  Database connection established successfully.');
+    logger.info('Database connection established successfully.');
   } catch (error) {
-    console.error('❌  Unable to connect to the database:', error.message);
+    logger.error('Unable to connect to the database.', { message: error.message });
     process.exit(1);
   }
 };

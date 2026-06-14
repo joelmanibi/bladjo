@@ -37,6 +37,8 @@ hotel-admin/.env.*
 # --- Backend: Node / Express / Sequelize ---
 hotel-erp-backend/node_modules/
 hotel-erp-backend/coverage/
+hotel-erp-backend/logs/*
+!hotel-erp-backend/logs/.gitkeep
 
 # Local env files for backend
 hotel-erp-backend/.env

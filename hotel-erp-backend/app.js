@@ -6,6 +6,7 @@ const cors = require('cors');
 const path = require('path');
 
 const errorHandler = require('./middleware/errorHandler');
+const requestLogger = require('./middleware/requestLogger');
 
 const app = express();
 
@@ -31,6 +32,9 @@ app.use(cors(corsOptions));
 // ─── BODY PARSERS ────────────────────────────────────────────────────────────
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// ─── REQUEST LOGGING ─────────────────────────────────────────────────────────
+app.use(requestLogger);
 
 // ─── STATIC FILES ────────────────────────────────────────────────────────────
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
