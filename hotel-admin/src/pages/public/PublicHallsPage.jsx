@@ -3,11 +3,21 @@ import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import PublicLayout from '../../components/public/PublicLayout';
 import { formatCurrency, getHallImageUrl, getShortText } from './publicUtils';
+import { buildHotelSchema, usePublicSeo } from './publicSeo';
 
 export default function PublicHallsPage() {
   const [halls, setHalls] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  usePublicSeo({
+    title: 'Salles de réception',
+    description: 'Découvrez les salles de réception du Bladjo Hotel pour mariages, anniversaires, séminaires et événements professionnels.',
+    canonicalPath: '/salles',
+    schema: buildHotelSchema({
+      containsPlace: { '@type': 'Place', name: 'Salles de réception du Bladjo Hotel' },
+    }),
+  });
 
   useEffect(() => {
     api.get('/public/halls')

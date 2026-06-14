@@ -1,0 +1,24 @@
+User-agent: *
+Allow: /
+
+# Pages publiques indexables
+Sitemap: https://www.bladjo-hotel.com/sitemap.xml
+
+# Routes admin / internes à ne pas indexer
+Disallow: /login
+Disallow: /access-denied
+Disallow: /dashboard
+Disallow: /users
+Disallow: /rooms
+Disallow: /halls
+Disallow: /hall-bookings
+Disallow: /reservations
+Disallow: /stock
+Disallow: /commandes
+Disallow: /employees
+Disallow: /immeubles
+Disallow: /appartements
+Disallow: /locataires
+Disallow: /loyers
+Disallow: /paiements
+Disallow: /admin

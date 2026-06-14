@@ -3,12 +3,22 @@ import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import PublicLayout from '../../components/public/PublicLayout';
 import { formatCurrency, getRoomImageUrl, getShortText } from './publicUtils';
+import { buildHotelSchema, usePublicSeo } from './publicSeo';
 
 export default function PublicRoomsPage() {
   const [rooms, setRooms] = useState([]);
   const [typeFilter, setTypeFilter] = useState('ALL');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  usePublicSeo({
+    title: 'Chambres',
+    description: 'Découvrez les chambres du Bladjo Hotel : confort, calme, élégance et réservation en ligne pour vos séjours.',
+    canonicalPath: '/chambres',
+    schema: buildHotelSchema({
+      containsPlace: { '@type': 'Place', name: 'Chambres du Bladjo Hotel' },
+    }),
+  });
 
   useEffect(() => {
     api.get('/public/rooms')

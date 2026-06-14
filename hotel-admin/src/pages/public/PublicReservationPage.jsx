@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import api from '../../services/api';
 import PublicLayout from '../../components/public/PublicLayout';
 import { calcInclusiveDayCount, calcNightCount, formatCurrency } from './publicUtils';
+import { buildHotelSchema, usePublicSeo } from './publicSeo';
 
 const today = new Date().toISOString().slice(0, 10);
 
@@ -28,6 +29,18 @@ export default function PublicReservationPage() {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+
+  usePublicSeo({
+    title: 'Réservation',
+    description: 'Envoyez votre demande de réservation de chambre ou de salle au Bladjo Hotel en quelques instants.',
+    canonicalPath: '/reservation',
+    schema: buildHotelSchema({
+      potentialAction: {
+        '@type': 'ReserveAction',
+        target: 'https://www.bladjo-hotel.com/reservation',
+      },
+    }),
+  });
 
   useEffect(() => {
     Promise.allSettled([api.get('/public/rooms'), api.get('/public/halls')]).then(([roomsRes, hallsRes]) => {

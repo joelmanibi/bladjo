@@ -4,6 +4,7 @@ import api from '../../services/api';
 import PublicLayout from '../../components/public/PublicLayout';
 import AvailabilityCalendar from '../../components/public/AvailabilityCalendar';
 import { formatCurrency, getRoomImageUrls } from './publicUtils';
+import { buildHotelSchema, getSeoDescription, usePublicSeo } from './publicSeo';
 
 export default function PublicRoomDetailPage() {
   const { id } = useParams();
@@ -31,6 +32,19 @@ export default function PublicRoomDetailPage() {
     setActiveImage(0);
     setSelectedRange({ startDate: '', endDate: '' });
   }, [id]);
+
+  usePublicSeo({
+    title: room ? `${room.type} - Chambre ${room.roomNumber}` : 'Détail chambre',
+    description: getSeoDescription('Découvrez une chambre confortable du Bladjo Hotel, avec photos, disponibilité et réservation en ligne.', room?.description),
+    canonicalPath: `/chambres/${id}`,
+    schema: room ? buildHotelSchema({
+      containsPlace: {
+        '@type': 'HotelRoom',
+        name: `${room.type} - Chambre ${room.roomNumber}`,
+        description: getSeoDescription('', room.description),
+      },
+    }) : null,
+  });
 
   const goToReservation = () => {
     if (!room || !selectedRange.startDate || !selectedRange.endDate) return;

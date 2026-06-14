@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { getAuth } from '../utils/auth';
+import { canAccess, getAuth } from '../utils/auth';
 
 const NAV_ITEMS = [
   { label: 'Dashboard',    path: '/dashboard',    icon: '🏠', roles: ['SUPER_ADMIN', 'GERANT', 'RECEPTION'] },
@@ -20,8 +20,10 @@ const NAV_ITEMS = [
 ];
 
 export default function Sidebar() {
-  const { role } = getAuth();
-  const visibleItems = NAV_ITEMS.filter((item) => item.roles.includes(role));
+  const { role, backendRole } = getAuth();
+  const visibleItems = NAV_ITEMS.filter(
+    (item) => item.roles.includes(role) && canAccess(item.path, role, backendRole)
+  );
 
   return (
     <aside style={styles.sidebar}>
@@ -66,6 +68,7 @@ const styles = {
     flexDirection: 'column',
     position: 'sticky',
     top: 0,
+    overflow: 'hidden',
   },
   brand: {
     display: 'flex',
@@ -87,6 +90,10 @@ const styles = {
     padding: '16px 12px',
     gap: '4px',
     flex: 1,
+    minHeight: 0,
+    overflowY: 'auto',
+    scrollbarWidth: 'thin',
+    scrollbarColor: 'rgba(255,255,255,0.18) transparent',
   },
   navItem: {
     display: 'flex',

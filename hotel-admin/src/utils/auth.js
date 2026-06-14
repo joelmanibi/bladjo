@@ -10,6 +10,10 @@ const ROLE_MAP = {
   RECEPTIONIST: 'RECEPTION',
 };
 
+const BACKEND_ROLE_ROUTE_OVERRIDES = {
+  OWNER: ['/dashboard'],
+};
+
 // ─── Allowed Routes per Frontend Role ────────────────────────────────────────
 export const ALLOWED_ROUTES = {
   SUPER_ADMIN: ['*'],
@@ -26,9 +30,10 @@ export const ALLOWED_ROUTES = {
  */
 export function saveAuth(token, backendRole, userName) {
   const role = ROLE_MAP[backendRole] || 'RECEPTION';
-  localStorage.setItem('token',    token);
-  localStorage.setItem('role',     role);
-  localStorage.setItem('userName', userName || '');
+  localStorage.setItem('token',       token);
+  localStorage.setItem('role',        role);
+  localStorage.setItem('backendRole', backendRole || '');
+  localStorage.setItem('userName',    userName || '');
 }
 
 // ─── getAuth ──────────────────────────────────────────────────────────────────
@@ -38,9 +43,10 @@ export function saveAuth(token, backendRole, userName) {
  */
 export function getAuth() {
   return {
-    token:    localStorage.getItem('token'),
-    role:     localStorage.getItem('role'),
-    userName: localStorage.getItem('userName'),
+    token:       localStorage.getItem('token'),
+    role:        localStorage.getItem('role'),
+    backendRole: localStorage.getItem('backendRole'),
+    userName:    localStorage.getItem('userName'),
   };
 }
 
@@ -51,7 +57,20 @@ export function getAuth() {
 export function clearAuth() {
   localStorage.removeItem('token');
   localStorage.removeItem('role');
+  localStorage.removeItem('backendRole');
   localStorage.removeItem('userName');
+}
+
+export function getAllowedRoutes(userRole, backendRole) {
+  if (backendRole && BACKEND_ROLE_ROUTE_OVERRIDES[backendRole]) {
+    return BACKEND_ROLE_ROUTE_OVERRIDES[backendRole];
+  }
+
+  return ALLOWED_ROUTES[userRole] || [];
+}
+
+export function isSupervisorOnlyUser(backendRole) {
+  return backendRole === 'OWNER';
 }
 
 // ─── canAccess ────────────────────────────────────────────────────────────────
@@ -61,9 +80,9 @@ export function clearAuth() {
  * @param {string} userRole - Frontend role (SUPER_ADMIN | GERANT | RECEPTION)
  * @returns {boolean}
  */
-export function canAccess(route, userRole) {
+export function canAccess(route, userRole, backendRole) {
   if (!userRole) return false;
-  const allowed = ALLOWED_ROUTES[userRole];
+  const allowed = getAllowedRoutes(userRole, backendRole);
   if (!allowed) return false;
   if (allowed.includes('*')) return true;
   return allowed.some((r) => route === r || route.startsWith(r + '/'));

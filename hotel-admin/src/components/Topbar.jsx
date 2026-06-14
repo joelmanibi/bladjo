@@ -1,8 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import { getAuth, clearAuth } from '../utils/auth';
 
-// Label and color for each frontend role badge
+// Label and color for each role badge
 const ROLE_META = {
+  OWNER:       { label: 'Propriétaire', bg: '#ede9fe', color: '#6d28d9' },
+  ADMIN:       { label: 'Admin',        bg: '#dbeafe', color: '#1d4ed8' },
+  MANAGER:     { label: 'Gérant',       bg: '#dcfce7', color: '#16a34a' },
+  ACCOUNTANT:  { label: 'Comptable',    bg: '#fef3c7', color: '#b45309' },
+  RECEPTIONIST:{ label: 'Réception',    bg: '#ffedd5', color: '#c2410c' },
   SUPER_ADMIN: { label: 'Super Admin', bg: '#dbeafe', color: '#1d4ed8' },
   GERANT:      { label: 'Gérant',      bg: '#dcfce7', color: '#16a34a' },
   RECEPTION:   { label: 'Réception',   bg: '#ffedd5', color: '#c2410c' },
@@ -10,7 +15,7 @@ const ROLE_META = {
 
 export default function Topbar({ title }) {
   const navigate = useNavigate();
-  const { userName, role } = getAuth();
+  const { userName, role, backendRole } = getAuth();
 
   const handleLogout = () => {
     clearAuth();
@@ -18,7 +23,8 @@ export default function Topbar({ title }) {
   };
 
   const initial  = userName ? userName.charAt(0).toUpperCase() : '?';
-  const roleMeta = ROLE_META[role] || { label: role || '—', bg: '#f1f5f9', color: '#64748b' };
+  const roleKey = backendRole || role;
+  const roleMeta = ROLE_META[roleKey] || ROLE_META[role] || { label: roleKey || '—', bg: '#f1f5f9', color: '#64748b' };
 
   return (
     <header style={styles.topbar}>

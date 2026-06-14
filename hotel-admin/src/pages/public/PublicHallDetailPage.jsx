@@ -4,6 +4,7 @@ import api from '../../services/api';
 import PublicLayout from '../../components/public/PublicLayout';
 import AvailabilityCalendar from '../../components/public/AvailabilityCalendar';
 import { formatCurrency, getHallImageUrls } from './publicUtils';
+import { buildHotelSchema, getSeoDescription, usePublicSeo } from './publicSeo';
 
 export default function PublicHallDetailPage() {
   const { id } = useParams();
@@ -31,6 +32,19 @@ export default function PublicHallDetailPage() {
     setActiveImage(0);
     setSelectedRange({ startDate: '', endDate: '' });
   }, [id]);
+
+  usePublicSeo({
+    title: hall ? `${hall.name} - Salle de réception` : 'Détail salle',
+    description: getSeoDescription('Découvrez une salle de réception élégante du Bladjo Hotel, avec photos, disponibilité et réservation en ligne.', hall?.description),
+    canonicalPath: `/salles/${id}`,
+    schema: hall ? buildHotelSchema({
+      containsPlace: {
+        '@type': 'EventVenue',
+        name: hall.name,
+        description: getSeoDescription('', hall.description),
+      },
+    }) : null,
+  });
 
   const goToReservation = () => {
     if (!hall || !selectedRange.startDate || !selectedRange.endDate) return;

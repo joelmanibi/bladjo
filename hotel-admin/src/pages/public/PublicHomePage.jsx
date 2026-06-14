@@ -3,10 +3,18 @@ import { useEffect, useMemo, useState } from 'react';
 import api from '../../services/api';
 import PublicLayout from '../../components/public/PublicLayout';
 import { formatCurrency, getHallImageUrl, getRoomImageUrl, getShortText } from './publicUtils';
+import { buildHotelSchema, usePublicSeo } from './publicSeo';
 
 export default function PublicHomePage() {
   const [rooms, setRooms] = useState([]);
   const [halls, setHalls] = useState([]);
+
+  usePublicSeo({
+    title: 'Bladjo Hotel',
+    description: 'Réservez vos chambres confortables et vos salles de réception au Bladjo Hotel. Séjours, événements, séminaires et cérémonies en un seul endroit.',
+    canonicalPath: '/',
+    schema: buildHotelSchema(),
+  });
 
   useEffect(() => {
     Promise.allSettled([api.get('/public/rooms'), api.get('/public/halls')]).then(([roomsRes, hallsRes]) => {

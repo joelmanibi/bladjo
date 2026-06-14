@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import LoginPage                from './pages/LoginPage';
 import DashboardPage            from './pages/DashboardPage';
 import AccessDenied             from './pages/AccessDenied';
@@ -31,13 +31,17 @@ import PublicHallsPage          from './pages/public/PublicHallsPage';
 import PublicRoomDetailPage     from './pages/public/PublicRoomDetailPage';
 import PublicHallDetailPage     from './pages/public/PublicHallDetailPage';
 import PublicReservationPage    from './pages/public/PublicReservationPage';
-import { getAuth }              from './utils/auth';
+import { canAccess, getAuth, isSupervisorOnlyUser } from './utils/auth';
 
 // ─── Route guard: checks auth + role ─────────────────────────────────────────
 function RoleProtectedRoute({ children, allowedRoles }) {
-  const { token, role } = getAuth();
+  const location = useLocation();
+  const { token, role, backendRole } = getAuth();
   if (!token || !role) return <Navigate to="/login" replace />;
   if (!allowedRoles.includes(role)) return <Navigate to="/access-denied" replace />;
+  if (!canAccess(location.pathname, role, backendRole)) {
+    return <Navigate to={isSupervisorOnlyUser(backendRole) ? '/dashboard' : '/access-denied'} replace />;
+  }
   return children;
 }
 
